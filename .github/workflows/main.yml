@@ -16,45 +16,21 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Auto-generate missing Gradle configs
-        run: |
-          if [ ! -f settings.gradle.kts ]; then
-            echo 'pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }' > settings.gradle.kts
-            echo 'dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOSITORIES); repositories { google(); mavenCentral() } }' >> settings.gradle.kts
-            echo 'rootProject.name = "FCM-KeepAlive"' >> settings.gradle.kts
-            echo 'include(":app")' >> settings.gradle.kts
-          fi
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
-          if [ ! -f build.gradle.kts ]; then
-            echo 'plugins { id("com.android.application") version "8.2.2" apply false; id("org.jetbrains.kotlin.android") version "1.9.22" apply false }' > build.gradle.kts
-          fi
+      - name: Auto-generate clean Gradle configs
+        run: |
+          echo 'rootProject.name = "FCM-KeepAlive"' > settings.gradle.kts
+          echo 'include(":app")' >> settings.gradle.kts
+
+          echo 'plugins { id("com.android.application") version "8.2.2" apply false; id("org.jetbrains.kotlin.android") version "1.9.22" apply false }' > build.gradle.kts
 
           mkdir -p app
-          if [ ! -f app/build.gradle.kts ]; then
-            cat << 'EOF' > app/build.gradle.kts
-          plugins {
-              id("com.android.application")
-              id("org.jetbrains.kotlin.android")
-          }
-          android {
-              namespace = "com.example.fcmkeepalive"
-              compileSdk = 34
-              defaultConfig {
-                  applicationId = "com.example.fcmkeepalive"
-                  minSdk = 26
-                  targetSdk = 34
-                  versionCode = 1
-                  versionName = "1.0"
-              }
-          }
-          EOF
-          fi
-
-      - name: Setup Gradle Wrapper
-        run: gradle wrapper
+          printf 'plugins {\n    id("com.android.application")\n    id("org.jetbrains.kotlin.android")\n}\n\nandroid {\n    namespace = "com.example.fcmkeepalive"\n    compileSdk = 34\n\n    defaultConfig {\n        applicationId = "com.example.fcmkeepalive"\n        minSdk = 26\n        targetSdk = 34\n        versionCode = 1\n        versionName = "1.0"\n    }\n}\n' > app/build.gradle.kts
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
