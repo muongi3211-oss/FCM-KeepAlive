@@ -21,8 +21,7 @@ jobs:
 
       - name: Auto-generate clean Gradle configs
         run: |
-          echo 'rootProject.name = "FCM-KeepAlive"' > settings.gradle.kts
-          echo 'include(":app")' >> settings.gradle.kts
+          printf 'pluginManagement {\n    repositories {\n        google()\n        mavenCentral()\n        gradlePluginPortal()\n    }\n}\ndependencyResolutionManagement {\n    repositories {\n        google()\n        mavenCentral()\n    }\n}\nrootProject.name = "FCM-KeepAlive"\ninclude(":app")\n' > settings.gradle.kts
 
           echo 'plugins { id("com.android.application") version "8.2.2" apply false; id("org.jetbrains.kotlin.android") version "1.9.22" apply false }' > build.gradle.kts
 
